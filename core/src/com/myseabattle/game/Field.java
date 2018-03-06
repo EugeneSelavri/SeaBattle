@@ -1,4 +1,4 @@
-package com.seabattle;
+package com.myseabattle.game;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;

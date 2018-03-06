@@ -1,4 +1,4 @@
-package com.seabattle;
+package com.myseabattle.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -14,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
 public class GameScreen implements Screen {
     private SpriteBatch batch;
-    private Rectangle rectangle;
     private float HEIGHT;
     private float WIDTH;
     private final float mapSize;
@@ -25,8 +25,9 @@ public class GameScreen implements Screen {
     private Texture background;
     private Label labelYou;
     private Label labelAI;
+    private EffectManager effectManager;
 
-    public GameScreen(MainGame mainGame, Field field) {
+    public GameScreen(final MainGame mainGame, Field field) {
         this.mainGame = mainGame;
 
         batch = new SpriteBatch();
@@ -56,6 +57,7 @@ public class GameScreen implements Screen {
                 int j = Field.n - (int)(y * Field.n) - 1;
 
                 field2.hit(i,j);
+                makeExplosion(screenX, (int)(HEIGHT - screenY));
                 if (field2.checkDeath()) {
                     ResultScreen rs = new ResultScreen(mainGame, "YOU");
                     mainGame.setScreen(rs);
@@ -66,10 +68,23 @@ public class GameScreen implements Screen {
             }
 
         });
+
+        batch = new SpriteBatch();
+        effectManager = new EffectManager();
+    }
+
+    private void makeExplosion(int x, int y) {
+        ParticleEffect effect = new ParticleEffect();
+        effect.load(Gdx.files.internal("effects/explosion.p"), Gdx.files.internal("img"));
+        effect.setPosition(x, y);
+        effect.scaleEffect(0.2f);
+
+        effectManager.addNew(effect);
     }
 
     @Override
     public void show() {
+
     }
 
     public void logicAI() {
@@ -82,8 +97,9 @@ public class GameScreen implements Screen {
             j = MathUtils.random(0, supposedMap.length - 1);
         } while (supposedMap[i][j] != 0);
 
-            field1.hit(i, j);
-            supposedMap[i][j] = 1;
+        field1.hit(i, j);
+//        makeExplosion(screenX, screenY);
+        supposedMap[i][j] = 1;
         if (field1.checkDeath()) {
             ResultScreen rs = new ResultScreen(mainGame, "AI");
             mainGame.setScreen(rs);
@@ -105,6 +121,10 @@ public class GameScreen implements Screen {
 
         field1.draw(WIDTH/2/5, HEIGHT/5, mapSize);
         field2.draw(WIDTH - WIDTH/2/5 - mapSize, HEIGHT/5, mapSize);
+
+        batch.begin();
+        effectManager.render(batch, delta);
+        batch.end();
 
     }
 
@@ -132,5 +152,6 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
+        effectManager.dispose();
     }
 }

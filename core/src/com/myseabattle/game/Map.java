@@ -1,7 +1,6 @@
-package com.seabattle;
+package com.myseabattle.game;
 
 public class Map {
-
     public static int[][] generate() {
         int i;
         int j;
